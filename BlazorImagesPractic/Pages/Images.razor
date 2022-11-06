@@ -1,0 +1,54 @@
+﻿@page "/images"
+
+@using BlazorImagesPractic.Data
+@inject FileSystemService FileSystemService
+
+<h3>Images</h3>
+
+<InputFile OnChange="@LoadFiles" multiple />
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Filename</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var name in names)
+        {
+            <tr>
+                <td>@name</td>
+                <td><button @onclick="() => Show(name)">Show</button></td>
+            </tr>   
+        }
+    </tbody>
+</table>
+
+<p>@fileName</p>
+<img src="@path" width="1000"/>
+
+@code {
+    string? path;
+    string? fileName;
+    List<string> names = new List<string>();
+    List<IBrowserFile> _loadedFiles = new();
+
+    protected override void OnInitialized() => LoadNames();
+
+    private void LoadNames() => names = FileSystemService.GetNamesOfImages();
+    private void Show(string name) => path = FileSystemService.DownloadToLocal(name);
+
+    private async Task LoadFiles(InputFileChangeEventArgs e)
+    {
+        _loadedFiles.Clear();
+        foreach (var file in e.GetMultipleFiles(e.FileCount))
+        {
+            _loadedFiles.Add(file);
+            Stream stream = file.OpenReadStream();
+            await FileSystemService.UploadImageToDbAsync(stream, file.Name);
+            stream.Dispose();
+        }
+        LoadNames();
+    }  
+}

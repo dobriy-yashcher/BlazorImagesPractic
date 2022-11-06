@@ -30,7 +30,7 @@ namespace BlazorImagesPractic.Data
         public List<string> GetNamesOfImages()
         {
             var client = new MongoClient("mongodb://localhost");
-            var database = client.GetDatabase("Images");
+            var database = client.GetDatabase("ImagesPractic");
             var collection = database.GetCollection<GridFSFileInfo>("fs.files");
 
             List<string> names = new();
